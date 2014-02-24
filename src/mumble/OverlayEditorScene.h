@@ -28,69 +28,68 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "mumble_pch.hpp"
+#ifndef MUMBLE_MUMBLE_OVERLAYEDITORSCENE_H_
+#define MUMBLE_MUMBLE_OVERLAYEDITORSCENE_H_
 
-#include "FileEngine.h"
+#include <QtGui/QGraphicsScene>
 
-#include "ClientUser.h"
-#include "Global.h"
+#include "Settings.h"
 
-MumbleFileEngineHandler::MumbleFileEngineHandler() : QAbstractFileEngineHandler() {
-}
+class OverlayEditorScene : public QGraphicsScene {
+	private:
+		Q_OBJECT
+		Q_DISABLE_COPY(OverlayEditorScene)
 
-QAbstractFileEngine *MumbleFileEngineHandler::create(const QString &name) const {
-	QUrl url(name);
+	protected:
+		QGraphicsItem *qgiGroup;
 
-	if (url.scheme() == QLatin1String("memoryblob"))
-		return new MumbleImageFileEngine(url);
+		QGraphicsPixmapItem *qgpiMuted;
+		QGraphicsPixmapItem *qgpiAvatar;
+		QGraphicsPixmapItem *qgpiName;
+		QGraphicsPixmapItem *qgpiChannel;
+		QGraphicsPathItem *qgpiBox;
+		QGraphicsRectItem *qgriSelected;
+		QGraphicsPixmapItem *qgpiSelected;
+		int iDragCorner;
 
-	return NULL;
-}
+		Qt::WindowFrameSection wfsHover;
 
-MumbleImageFileEngine::MumbleImageFileEngine(const QUrl &url) : QAbstractFileEngine(), quUrl(url) {
-	const QString &domain = url.host();
-	qslPath = url.path().split(QLatin1Char('/'), QString::SkipEmptyParts);
+		unsigned int uiSize;
 
-	if (domain == QLatin1String("avatar") && (qslPath.size() == 2)) {
+		void setup();
 
-		unsigned int session = qslPath.first().toUInt();
-		ClientUser *cu = ClientUser::get(session);
+		void contextMenuEvent(QGraphicsSceneContextMenuEvent *);
+		void mousePressEvent(QGraphicsSceneMouseEvent *);
+		void mouseMoveEvent(QGraphicsSceneMouseEvent *);
+		void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
+		void updateCursorShape(const QPointF &point);
 
-		if (cu)
-			qbData.setData(cu->qbaTexture);
-	}
-}
+		void drawBackground(QPainter *, const QRectF &);
 
-bool MumbleImageFileEngine::open(QIODevice::OpenMode om) {
-	return qbData.open(om);
-}
+		QGraphicsPixmapItem *childAt(const QPointF &);
+		QRectF selectedRect() const;
 
-bool MumbleImageFileEngine::close() {
-	qbData.close();
-	return true;
-}
+		static Qt::WindowFrameSection rectSection(const QRectF &rect, const QPointF &point, qreal dist = 3.0f);
+	public:
+		Settings::TalkState tsColor;
+		unsigned int uiZoom;
+		OverlaySettings os;
 
-bool MumbleImageFileEngine::seek(qint64 offset) {
-	return qbData.seek(offset);
-}
+		OverlayEditorScene(const OverlaySettings &, QObject *p = NULL);
+	public slots:
+		void resync();
+		void updateSelected();
 
-qint64 MumbleImageFileEngine::size() const {
-	return qbData.size();
-}
+		void updateMuted();
+		void updateUserName();
+		void updateChannel();
+		void updateAvatar();
 
-qint64 MumbleImageFileEngine::pos() const {
-	return qbData.pos();
-}
+		void moveMuted();
+		void moveUserName();
+		void moveChannel();
+		void moveAvatar();
+		void moveBox();
+};
 
-qint64 MumbleImageFileEngine::read(char *data, qint64 maxlen) {
-	return qbData.read(data, maxlen);
-}
-
-QString MumbleImageFileEngine::fileName(QAbstractFileEngine::FileName fn) const {
-	switch (fn) {
-		case QAbstractFileEngine::BaseName:
-			return qslPath.last();
-		default:
-			return quUrl.toString();
-	}
-}
+#endif

@@ -145,12 +145,14 @@ OverlaySettings::OverlaySettings() {
 
 	setPreset();
 
-	// FPS display settings
+	// FPS and Time display settings
 	qcFps = Qt::white;
 	fFps = 0.75f;
 	qfFps = qfUserName;
-	qrfFps = QRectF(10, 10, -1, 0.023438f);
+	qrfFps = QRectF(10, 50, -1, 0.023438f);
 	bFps = false;
+	qrfTime = QRectF(10, 10, -1, 0.023438f);
+	bTime = false;
 
 	bUseWhitelist = false;
 
@@ -263,6 +265,7 @@ Settings::Settings() {
 	fOtherVolume = 0.5f;
 	bAttenuateOthersOnTalk = false;
 	bAttenuateOthers = true;
+	bAttenuateUsersOnPrioritySpeak = false;
 	iMinLoudness = 1000;
 	iVoiceHold = 50;
 	iJitterBufferSize = 1;
@@ -297,7 +300,11 @@ Settings::Settings() {
 	bPluginCheck = true;
 #endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	qsImagePath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+#else
 	qsImagePath = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation);
+#endif
 
 	ceExpand = ChannelsWithUsers;
 	ceChannelDrag = Ask;
@@ -316,6 +323,9 @@ Settings::Settings() {
 	bUsage = true;
 	bShowUserCount = false;
 	bChatBarUseSelection = false;
+	bFilterHidesEmptyChannels = true;
+	bFilterActive = false;
+
 	wlWindowLayout = LayoutClassic;
 	bShowContextMenuInMenuBar = false;
 
@@ -365,7 +375,11 @@ Settings::Settings() {
 	bHighContrast = false;
 
 	// Recording
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	qsRecordingPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+#else
 	qsRecordingPath = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+#endif
 	qsRecordingFile = QLatin1String("Mumble-%date-%time-%host-%user");
 	rmRecordingMode = RecordingMixdown;
 	iRecordingFormat = 0;
@@ -504,6 +518,7 @@ void OverlaySettings::load(QSettings* settings_ptr) {
 	SAVELOAD(bAvatar, "avatarshow");
 	SAVELOAD(bBox, "boxshow");
 	SAVELOAD(bFps, "fpsshow");
+	SAVELOAD(bTime, "timeshow");
 
 	SAVELOAD(fUserName, "useropacity");
 	SAVELOAD(fChannel, "channelopacity");
@@ -549,6 +564,7 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(fOtherVolume, "audio/othervolume");
 	SAVELOAD(bAttenuateOthers, "audio/attenuateothers");
 	SAVELOAD(bAttenuateOthersOnTalk, "audio/attenuateothersontalk");
+	SAVELOAD(bAttenuateUsersOnPrioritySpeak, "audio/attenuateusersonpriorityspeak");
 	LOADENUM(vsVAD, "audio/vadsource");
 	SAVELOAD(fVADmin, "audio/vadmin");
 	SAVELOAD(fVADmax, "audio/vadmax");
@@ -655,6 +671,8 @@ void Settings::load(QSettings* settings_ptr) {
 	SAVELOAD(bUsage, "ui/usage");
 	SAVELOAD(bShowUserCount, "ui/showusercount");
 	SAVELOAD(bChatBarUseSelection, "ui/chatbaruseselection");
+	SAVELOAD(bFilterHidesEmptyChannels, "ui/filterhidesemptychannels");
+	SAVELOAD(bFilterActive, "ui/filteractive");
 	SAVELOAD(qsImagePath, "ui/imagepath");
 	SAVELOAD(bShowContextMenuInMenuBar, "ui/showcontextmenuinmenubar");
 	SAVELOAD(qbaConnectDialogGeometry, "ui/connect/geometry");
@@ -791,6 +809,7 @@ void OverlaySettings::save(QSettings* settings_ptr) {
 	SAVELOAD(bAvatar, "avatarshow");
 	SAVELOAD(bBox, "boxshow");
 	SAVELOAD(bFps, "fpsshow");
+	SAVELOAD(bTime, "timeshow");
 
 	SAVELOAD(fUserName, "useropacity");
 	SAVELOAD(fChannel, "channelopacity");
@@ -835,6 +854,7 @@ void Settings::save() {
 	SAVELOAD(fOtherVolume, "audio/othervolume");
 	SAVELOAD(bAttenuateOthers, "audio/attenuateothers");
 	SAVELOAD(bAttenuateOthersOnTalk, "audio/attenuateothersontalk");
+	SAVELOAD(bAttenuateUsersOnPrioritySpeak, "audio/attenuateusersonpriorityspeak");
 	SAVELOAD(vsVAD, "audio/vadsource");
 	SAVELOAD(fVADmin, "audio/vadmin");
 	SAVELOAD(fVADmax, "audio/vadmax");
@@ -938,6 +958,8 @@ void Settings::save() {
 	SAVELOAD(bUsage, "ui/usage");
 	SAVELOAD(bShowUserCount, "ui/showusercount");
 	SAVELOAD(bChatBarUseSelection, "ui/chatbaruseselection");
+	SAVELOAD(bFilterHidesEmptyChannels, "ui/filterhidesemptychannels");
+	SAVELOAD(bFilterActive, "ui/filteractive");
 	SAVELOAD(qsImagePath, "ui/imagepath");
 	SAVELOAD(bShowContextMenuInMenuBar, "ui/showcontextmenuinmenubar");
 	SAVELOAD(qbaConnectDialogGeometry, "ui/connect/geometry");

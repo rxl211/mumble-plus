@@ -84,6 +84,9 @@ while (my $pro = shift @pro) {
           } elsif ($value eq '../$$SOURCEDIR/helper') { # sbcelt helper
             $vdir =~ s/-helper-build/-src/;
             push @vpath, $vdir.'helper/';
+          } elsif ($vdir eq '3rdparty/fx11-build/' and $value eq '../$$SOURCEDIR') { # fx11
+            $vdir =~ s/-build/-src/;
+            push @vpath, $vdir;
           } else {
             push @vpath,map { "$basedir$_/"} map { s/\$\$PWD/./; $_;} split(/\s/, $value);
           }
@@ -151,7 +154,10 @@ push @fulldirs, "sbcelt-src/helper";
 push @fulldirs, "sbcelt-src/lib";
 push @fulldirs, "opus-src";
 push @fulldirs, "opus-src/celt";
+push @fulldirs, "opus-src/celt/arm";
+push @fulldirs, "opus-src/celt/x86";
 push @fulldirs, "opus-src/silk";
+push @fulldirs, "opus-src/silk/arm";
 push @fulldirs, "opus-src/silk/float";
 push @fulldirs, "opus-src/silk/fixed";
 push @fulldirs, "opus-src/src";
@@ -217,7 +223,3 @@ my $gz=gzopen("mumble-${ver}.tar.gz", "w");
 $gz->gzwrite($tar->write());
 $gz->gzclose();
 $zip->writeToFileNamed("mumble-${ver}.zip");
-
-copy("mumble-${ver}.tar.gz", "../deb-mumble/tarballs/mumble_${ver}.orig.tar.gz");
-system("/usr/bin/gpg", "--armor", "--default-key", "DEBA6F3E", "--sign", "--detach-sign", "--output", "mumble-${ver}.tar.gz.sig", "mumble-${ver}.tar.gz");
-system("/usr/bin/scp", "-4", "mumble-${ver}.tar.gz", "mumble-${ver}.tar.gz.sig", "slicer\@mumble.hive.no:/var/www/snapshot/");

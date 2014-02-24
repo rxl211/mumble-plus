@@ -306,13 +306,15 @@ void AudioInputDialog::on_qcbPushClick_clicked(bool b) {
 }
 
 void AudioInputDialog::on_qpbPushClickBrowseOn_clicked() {
-	QString qsnew = AudioOutputSample::browseForSndfile();
+	QString defaultpath(qlePushClickPathOn->text());
+	QString qsnew = AudioOutputSample::browseForSndfile(defaultpath);
 	if (!qsnew.isEmpty())
 		qlePushClickPathOn->setText(qsnew);
 }
 
 void AudioInputDialog::on_qpbPushClickBrowseOff_clicked() {
-	QString qsnew = AudioOutputSample::browseForSndfile();
+	QString defaultpath(qlePushClickPathOff->text());
+	QString qsnew = AudioOutputSample::browseForSndfile(defaultpath);
 	if (!qsnew.isEmpty())
 		qlePushClickPathOff->setText(qsnew);
 }
@@ -451,6 +453,7 @@ void AudioOutputDialog::load(const Settings &r) {
 	loadSlider(qsOtherVolume, iroundf((1.0f - r.fOtherVolume) * 100.0f + 0.5f));
 	loadCheckBox(qcbAttenuateOthersOnTalk, r.bAttenuateOthersOnTalk);
 	loadCheckBox(qcbAttenuateOthers, r.bAttenuateOthers);
+	loadCheckBox(qcbAttenuateUsersOnPrioritySpeak, r.bAttenuateUsersOnPrioritySpeak);
 	loadSlider(qsJitter, r.iJitterBufferSize);
 	loadComboBox(qcbLoopback, r.lmLoopMode);
 	loadSlider(qsPacketDelay, static_cast<int>(r.dMaxPacketDelay));
@@ -472,6 +475,7 @@ void AudioOutputDialog::save() const {
 	s.fOtherVolume = 1.0f - (static_cast<float>(qsOtherVolume->value()) / 100.0f);
 	s.bAttenuateOthersOnTalk = qcbAttenuateOthersOnTalk->isChecked();
 	s.bAttenuateOthers = qcbAttenuateOthers->isChecked();
+	s.bAttenuateUsersOnPrioritySpeak = qcbAttenuateUsersOnPrioritySpeak->isChecked();
 	s.iJitterBufferSize = qsJitter->value();
 	s.qsAudioOutput = qcbSystem->currentText();
 	s.lmLoopMode = static_cast<Settings::LoopMode>(qcbLoopback->currentIndex());

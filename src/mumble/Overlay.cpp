@@ -32,6 +32,7 @@
 
 #include "Overlay.h"
 
+#include "OverlayClient.h"
 #include "Channel.h"
 #include "ClientUser.h"
 #include "Database.h"
@@ -120,7 +121,7 @@ Overlay::~Overlay() {
 }
 
 void Overlay::newConnection() {
-	while (1) {
+	while (true) {
 		QLocalSocket *qls = qlsServer->nextPendingConnection();
 		if (! qls)
 			break;
